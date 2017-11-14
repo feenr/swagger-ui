@@ -91,12 +91,14 @@ export default class ParameterRow extends Component {
 
     const ModelExample = getComponent("modelExample")
     const Markdown = getComponent("Markdown")
+    const EnumModel = getComponent("EnumModel")
 
     let schema = param.get("schema")
     let type = isOAS3 && isOAS3() ? param.getIn(["schema", "type"]) : param.get("type")
     let isFormData = inType === "formData"
     let isFormDataSupported = "FormData" in win
     let required = param.get("required")
+    let enumValue = isOAS3() ?  (param.get("schema") || Map()).get("enum") : parameter ? parameter.get("enum") : undefined
     let itemType = param.getIn(isOAS3 && isOAS3() ? ["schema", "items", "type"] : ["items", "type"])
     let parameter = specSelectors.getParameter(pathMethod, param.get("name"), param.get("in"))
     let value = parameter ? parameter.get("value") : ""
@@ -112,7 +114,7 @@ export default class ParameterRow extends Component {
           <div className="parameter__deprecated">
             { isOAS3 && isOAS3() && param.get("deprecated") ? "deprecated": null }
           </div>
-          <div className="parameter__in">({ param.get("in") })</div>
+          <div className="parameter__in">({ param.get("in")})</div>
         </td>
 
         <td className="col parameters-col_description">
@@ -137,7 +139,10 @@ export default class ParameterRow extends Component {
                                                 specSelectors={ specSelectors }
                                                 schema={ schema }
                                                 example={ bodyParam }/>
+              : enumValue && !isExecute && false? <EnumModel value={ enumValue } getComponent={ getComponent }/>
+              : enumValue && !isExecute && true ? <div className="parameter__enum">Possible Values [{enumValue.map(s=>"\""+s+"\"").join(", ")}]</div>
               : null
+              // TODO one of these options should be removed.
           }
 
         </td>
